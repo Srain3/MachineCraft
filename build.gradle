@@ -1,0 +1,31 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.7.22'
+    id "org.jetbrains.dokka" version "1.7.20"
+}
+
+group = 'com.github.srain3'
+version = '0.1.0'
+
+repositories {
+    mavenCentral()
+    maven { url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
+}
+
+dependencies {
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.7.22'
+    compileOnly "org.spigotmc:spigot-api:1.19.2-R0.1-SNAPSHOT"
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = '17'
+}
+
+apply {
+    pluginManager.apply("org.jetbrains.dokka")
+}
+
+jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
