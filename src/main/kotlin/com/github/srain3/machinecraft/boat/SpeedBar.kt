@@ -7,6 +7,7 @@ import org.bukkit.entity.Boat
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 import kotlin.math.absoluteValue
+import kotlin.math.roundToInt
 
 object SpeedBar {
 
@@ -45,7 +46,7 @@ object SpeedBar {
         }
         if (players.isEmpty()) {
             oldBarPlayers.forEach {
-                it.sendMessage("今回の乗車距離: ${distanceIsBoat[it]}m")
+                it.sendMessage("今回の乗車距離: ${distanceIsBoat[it]?.roundToInt()}m")
                 distanceIsBoat.remove(it)
                 vectorList.remove(it)
             }
@@ -55,13 +56,13 @@ object SpeedBar {
         oldBarPlayers.forEach {
             if (it.isOnline) {
                 if (!players.contains(it)) {
-                    it.sendMessage("今回の乗車距離: ${distanceIsBoat[it]}m")
+                    it.sendMessage("今回の乗車距離: ${distanceIsBoat[it]?.roundToInt()}m")
                     distanceIsBoat.remove(it)
                     vectorList.remove(it)
                     boatSpeedBar[mount]?.removePlayer(it)
                 }
             } else {
-                it.sendMessage("今回の乗車距離: ${distanceIsBoat[it]}m")
+                it.sendMessage("今回の乗車距離: ${distanceIsBoat[it]?.roundToInt()}m")
                 distanceIsBoat.remove(it)
                 vectorList.remove(it)
                 boatSpeedBar[mount]?.removePlayer(it)

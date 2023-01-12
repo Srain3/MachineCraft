@@ -6,6 +6,7 @@ import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 import kotlin.math.PI
 import kotlin.math.absoluteValue
+import kotlin.math.min
 
 object Control {
 
@@ -79,7 +80,7 @@ object Control {
         // スリップ(滑る)または曲がる挙動用
         val newYaw = when (wasd) {
             "A", "WA", "SA" -> {
-                val slip = ((slipAngle[mount] ?: 0F) + (2.5F*(0.5F+speed.z.absoluteValue.toFloat()))) * 0.9F
+                val slip = ((slipAngle[mount] ?: 0F) + (2.5F*(0.5F+min(1.0F,speed.z.absoluteValue.toFloat())))) * 0.9F
                 slipAngle[mount] = slip
                 if (wasd != "A") {
                     speed.multiply(0.9825)
@@ -89,7 +90,7 @@ object Control {
                 mount.location.yaw + slip
             }
             "D", "WD", "SD" -> {
-                val slip = ((slipAngle[mount] ?: 0F) - (2.5F*(0.5F+speed.z.absoluteValue.toFloat()))) * 0.9F
+                val slip = ((slipAngle[mount] ?: 0F) - (2.5F*(0.5F+ min(1.0F,speed.z.absoluteValue.toFloat())))) * 0.9F
                 slipAngle[mount] = slip
                 if (wasd != "D") {
                     speed.multiply(0.9825)

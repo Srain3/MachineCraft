@@ -27,6 +27,7 @@ object VehicleMove: Listener {
         val speedVec = boatSpeed[boat] ?: return
 
         boatSpeed[boat] = speedVec.multiply(0.5)
+        /*
         val entity = event.entity
         if (entity !is LivingEntity) return
         val player = boat.passengers.filterIsInstance<Player>().firstOrNull() ?: return
@@ -35,13 +36,14 @@ object VehicleMove: Listener {
             player.server.onlinePlayers.forEach {
                 it.sendMessage(ToolBox.colorMessage("[&c事故発生!&r] ${player.name} が${entity.name}と衝突しました!"))
             }
-        } else if (hitList[boat]?.get(entity.uniqueId)?.plusSeconds(2)?.isBefore(LocalDateTime.now()) == true) {
+        } else if (hitList[boat]?.get(entity.uniqueId)?.plusSeconds(15)?.isBefore(LocalDateTime.now()) == true) {
             (hitList[boat]?: mutableMapOf()).remove(entity.uniqueId)
             hitList[boat] = (hitList[boat]?: mutableMapOf()).apply { set(entity.uniqueId, LocalDateTime.now()) }
             player.server.onlinePlayers.forEach {
                 it.sendMessage(ToolBox.colorMessage("[&c事故発生!&r] ${player.name} が${entity.name}と衝突しました!"))
             }
         }
+         */
     }
 
     /**
