@@ -1,7 +1,5 @@
 package com.github.srain3.machinecraft
 
-import com.github.srain3.machinecraft.boat.Control.boatSpeed
-import com.github.srain3.machinecraft.boat.SpeedBar.boatSpeedBar
 import com.github.srain3.machinecraft.events.RideEvent
 import com.github.srain3.machinecraft.events.VehicleMove
 import org.bukkit.plugin.java.JavaPlugin
@@ -23,11 +21,9 @@ class MachineCraft: JavaPlugin() {
     }
 
     override fun onDisable() {
-        boatSpeed.keys.forEach { boat ->
-            boatSpeedBar.values.forEach { bar ->
-                bar.removeAll()
-            }
-            Bukkit.removeBossBar(ToolBox.pluginNamespaceKey(boat.uniqueId.toString()))
+        RideEvent.boatList.forEach { boatData ->
+            boatData.bossBar.removeAll()
+            Bukkit.removeBossBar(ToolBox.pluginNamespaceKey(boatData.boat.uniqueId.toString()))
         }
     }
 }
