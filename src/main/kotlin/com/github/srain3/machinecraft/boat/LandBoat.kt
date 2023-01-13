@@ -8,10 +8,7 @@ import org.bukkit.entity.Boat
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
-import kotlin.math.PI
-import kotlin.math.absoluteValue
-import kotlin.math.min
-import kotlin.math.roundToInt
+import kotlin.math.*
 
 /**
  * 各ボートの情報
@@ -140,10 +137,10 @@ data class LandBoat(
         speed.multiply(0.965) // 摩擦的なやつ
         when (wasd) { // 速度の判定
             "W", "WA", "WD" -> {
-                addSpeed.multiply(power)
+                addSpeed.multiply(power * min(1.0, max(0.35, (speed.z * (0.038-(speed.z*0.0034)) / (power*(0.8-power))))))
             }
             "S", "SA", "SD" -> {
-                addSpeed.multiply(-brakePower)
+                addSpeed.multiply(-brakePower * min(1.0, max(0.35, (speed.z.absoluteValue * (0.038-(speed.z.absoluteValue*0.0034)) / (brakePower*(0.8-brakePower))))))
             }
             else -> {
                 if (speed.z in -0.03..0.03) {
