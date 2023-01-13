@@ -1,10 +1,12 @@
 package com.github.srain3.machinecraft.boat
 
+import com.github.srain3.machinecraft.tools.ToolBox
 import org.bukkit.Material
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BossBar
 import org.bukkit.entity.Boat
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import kotlin.math.PI
 import kotlin.math.absoluteValue
@@ -18,10 +20,13 @@ data class LandBoat(
     val boat: Boat,
     val speed: Vector,
     val speedLimit: Double,
+    val power: Double,
+    val brakePower: Double,
     val bossBar: BossBar,
     var slipAngle: Float,
     val distanceIsBoat: MutableMap<Player, Double>,
-    var distanceVector: Vector
+    var distanceVector: Vector,
+    val item: ItemStack
 ) {
     /**
      * 操縦者を取得
@@ -42,14 +47,19 @@ data class LandBoat(
      */
     fun updateBar() {
         val barPercent = speed.z / speedLimit
+        var speedString = (speed.z * 50).roundToInt().toString()
         if (barPercent in -0.05..0.05) {
             bossBar.color = BarColor.WHITE
+            speedString = "&r&l${speedString}&rkm/h"
         } else if (barPercent > 0.05){
             bossBar.color = BarColor.GREEN
+            speedString = "&a&l${speedString}&r&akm/h"
         } else if (barPercent < -0.05) {
             bossBar.color = BarColor.RED
+            speedString = "&c&l${speedString}&r&ckm/h"
         }
         bossBar.progress = barPercent.absoluteValue
+        bossBar.setTitle(ToolBox.colorMessage("Boat Speed: $speedString"))
     }
 
     /**
@@ -130,10 +140,10 @@ data class LandBoat(
         speed.multiply(0.965) // 摩擦的なやつ
         when (wasd) { // 速度の判定
             "W", "WA", "WD" -> {
-                addSpeed.multiply(0.09)
+                addSpeed.multiply(power)
             }
             "S", "SA", "SD" -> {
-                addSpeed.multiply(-0.05)
+                addSpeed.multiply(-brakePower)
             }
             else -> {
                 if (speed.z in -0.03..0.03) {
