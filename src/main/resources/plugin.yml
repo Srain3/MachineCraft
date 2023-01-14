@@ -2,4 +2,4 @@ name: MachineCraft
 author: Srain3
 main: com.github.srain3.machinecraft.MachineCraft
 api-version: 1.19
-version: "0.2.2"
+version: "0.2.3"

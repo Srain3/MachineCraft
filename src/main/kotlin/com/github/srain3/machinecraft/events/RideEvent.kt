@@ -42,9 +42,6 @@ object RideEvent: Listener {
         object : BukkitRunnable() {
             override fun run() {
                 if (boatData.boat.isDead) {
-                    //boatData.bossBar.removeAll()
-                    //Bukkit.removeBossBar(ToolBox.pluginNamespaceKey(boatData.boat.uniqueId.toString()))
-                    //RideEvent.boatList.remove(boatData)
                     cancel()
                     return
                 }
@@ -67,13 +64,13 @@ object RideEvent: Listener {
                     // それ以外
                     boatData.speedAdd()
 
-                    boatData.updateBar()
-                    boatData.updatePlayer()
-
                     if (!boatData.jump()) {
                         boatData.blockHitCheck()
                     }
                 }
+                boatData.updateBar()
+                boatData.updatePlayer()
+
                 boatData.distanceUpdate()
 
                 return

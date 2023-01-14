@@ -43,20 +43,26 @@ data class LandBoat(
      * メーター更新
      */
     fun updateBar() {
-        val barPercent = speed.z / speedLimit
-        var speedString = (speed.z * 50).roundToInt().toString()
-        if (barPercent in -0.05..0.05) {
-            bossBar.color = BarColor.WHITE
-            speedString = "&r&l${speedString}&rkm/h"
-        } else if (barPercent > 0.05){
-            bossBar.color = BarColor.GREEN
-            speedString = "&a&l${speedString}&r&akm/h"
-        } else if (barPercent < -0.05) {
-            bossBar.color = BarColor.RED
-            speedString = "&c&l${speedString}&r&ckm/h"
+        if (onIce()) {
+            bossBar.color = BarColor.BLUE
+            bossBar.progress = 1.0
+            bossBar.setTitle(ToolBox.colorMessage("Boat Speed: &9&lICE mode"))
+        } else {
+            val barPercent = speed.z / speedLimit
+            var speedString = (speed.z * 50).roundToInt().toString()
+            if (barPercent in -0.05..0.05) {
+                bossBar.color = BarColor.WHITE
+                speedString = "&r&l${speedString}&rkm/h"
+            } else if (barPercent > 0.05) {
+                bossBar.color = BarColor.GREEN
+                speedString = "&a&l${speedString}&r&akm/h"
+            } else if (barPercent < -0.05) {
+                bossBar.color = BarColor.RED
+                speedString = "&c&l${speedString}&r&ckm/h"
+            }
+            bossBar.progress = barPercent.absoluteValue
+            bossBar.setTitle(ToolBox.colorMessage("Boat Speed: $speedString"))
         }
-        bossBar.progress = barPercent.absoluteValue
-        bossBar.setTitle(ToolBox.colorMessage("Boat Speed: $speedString"))
     }
 
     /**
