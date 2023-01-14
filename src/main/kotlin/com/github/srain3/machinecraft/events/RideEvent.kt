@@ -82,6 +82,7 @@ object RideEvent: Listener {
     private val topSpeedRegex = Regex("""TopSpeed: [0-9]+""")
     private val powerRegex = Regex("""Power: [0-9]+""")
     private val brakeRegex = Regex("""Brake: [0-9]+""")
+    private val slipRegex = Regex("""Momentum: [0-9]+""")
 
     @Suppress("DEPRECATION")
     @EventHandler
@@ -97,6 +98,7 @@ object RideEvent: Listener {
         var topSpeedInt = 50
         var powerInt = 40
         var brakeInt = 20
+        var slipInt = 25
         meta.lore?.forEach { line ->
             if (topSpeedRegex.matches(line)) {
                 // 最高速設定
@@ -107,7 +109,23 @@ object RideEvent: Listener {
             } else if (brakeRegex.matches(line)) {
                 // ブレーキ力(減速力)
                 brakeInt = line.replace("Brake: ","").toInt()
+            } else if (slipRegex.matches(line)) {
+                // モーメント(スリップ)力
+                slipInt = line.replace("Momentum: ","").toInt()
             }
+        }
+
+        if (topSpeedInt > 500) {
+            topSpeedInt = 500
+        }
+        if (powerInt > 500) {
+            powerInt = 500
+        }
+        if (brakeInt > 500) {
+            brakeInt = 500
+        }
+        if (slipInt >150) {
+            slipInt = 150
         }
 
         object : BukkitRunnable() {
@@ -122,8 +140,9 @@ object RideEvent: Listener {
                     val topSpeed = topSpeedInt * 0.02
                     val power = powerInt * 0.001
                     val brake = brakeInt * 0.001
+                    val momentum = slipInt * 0.1F
 
-                    val boatData = LandBoat(boat,Vector(),topSpeed,power,brake,bossBar,0F, mutableMapOf(), boat.location.toVector(), item.clone())
+                    val boatData = LandBoat(boat,Vector(),topSpeed,power,brake,bossBar,0F, momentum, mutableMapOf(), boat.location.toVector(), item.clone())
                     RideEvent.boatList.add(boatData)
                 }
             }

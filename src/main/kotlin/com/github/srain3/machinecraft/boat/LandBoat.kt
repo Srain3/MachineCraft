@@ -21,6 +21,7 @@ data class LandBoat(
     val brakePower: Double,
     val bossBar: BossBar,
     var slipAngle: Float,
+    val slipMomentum: Float,
     val distanceIsBoat: MutableMap<Player, Double>,
     var distanceVector: Vector,
     val item: ItemStack
@@ -168,7 +169,7 @@ data class LandBoat(
         // スリップ(滑る)または曲がる挙動用
         when (wasd) {
             "A", "WA", "SA" -> {
-                slipAngle = (slipAngle + (2.5F*(0.5F+ min(1.0F,speed.z.absoluteValue.toFloat())))) * 0.9F
+                slipAngle = (slipAngle + slipMomentum + min(1.5F,speed.z.absoluteValue.toFloat()*1.2F)) * 0.899F
                 if (wasd != "A") {
                     speed.multiply(0.9825)
                 } else {
@@ -176,7 +177,7 @@ data class LandBoat(
                 }
             }
             "D", "WD", "SD" -> {
-                slipAngle = (slipAngle - (2.5F*(0.5F+ min(1.0F,speed.z.absoluteValue.toFloat())))) * 0.9F
+                slipAngle = (slipAngle - slipMomentum - min(1.5F,speed.z.absoluteValue.toFloat()*1.2F)) * 0.899F
                 if (wasd != "D") {
                     speed.multiply(0.9825)
                 } else {
@@ -185,7 +186,7 @@ data class LandBoat(
             }
 
             "W", "S" -> {
-                slipAngle *= (0.4775F * (speed.z.absoluteValue.toFloat() / speedLimit.toFloat() + 1.0F))
+                slipAngle *= min(0.975F,(slipMomentum/100.0F+0.9F))
             }
 
             else -> {
