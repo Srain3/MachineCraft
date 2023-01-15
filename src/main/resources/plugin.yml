@@ -3,3 +3,11 @@ author: Srain3
 main: com.github.srain3.machinecraft.MachineCraft
 api-version: 1.19
 version: "0.3.0"
+
+depend:
+  - Vault
+
+commands:
+  machinecraft:
+    aliases: [ mac ]
+    description: "MachineCraft command"

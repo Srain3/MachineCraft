@@ -14,11 +14,10 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.vehicle.VehicleDestroyEvent
-import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Vector
 import org.spigotmc.event.entity.EntityMountEvent
-import java.util.UUID
+import java.util.*
 
 /**
  * 乗車イベント
@@ -89,16 +88,16 @@ object RideEvent: Listener {
         }.runTaskTimer(ToolBox.pl, 1, 1)
     }
 
-    private val boatRegex = Regex(""".*_BOAT""")
-    private val topSpeedRegex = Regex("""TopSpeed: [0-9]+""")
-    private val powerRegex = Regex("""Power: [0-9]+""")
-    private val brakeRegex = Regex("""Brake: [0-9]+""")
-    private val slipRegex = Regex("""Momentum: [0-9]+""")
+    val boatRegex = Regex(""".*_BOAT""")
+    val topSpeedRegex = Regex("""TopSpeed: [0-9]+(\+*)?""")
+    val powerRegex = Regex("""Power: [0-9]+(\+*)?""")
+    val brakeRegex = Regex("""Brake: [0-9]+(\+*)?""")
+    val slipRegex = Regex("""Momentum: [0-9]+(\+*|-*){0,300}""")
+    private val rentalRegex = Regex("""Rental: [0-9]+""")
 
     @Suppress("DEPRECATION")
     @EventHandler
     fun boatEntitySpawn(event: PlayerInteractEvent) {
-        if (event.hand != EquipmentSlot.HAND) return
         if (event.action != Action.RIGHT_CLICK_BLOCK) return
         if (event.isCancelled) return
         val item = event.item?.clone() ?: return
@@ -109,24 +108,46 @@ object RideEvent: Listener {
 
         if (clickLoc.block.type == Material.WATER) return
 
+        val player = event.player
+
         var topSpeedInt = 50
         var powerInt = 40
         var brakeInt = 20
         var slipInt = 25
+        var rentalInt: Int? = null
         meta.lore?.forEach { line ->
             if (topSpeedRegex.matches(line)) {
                 // 最高速設定
-                topSpeedInt = line.replace("TopSpeed: ","").toInt()
+                val rawStr = line.replace("TopSpeed: ","")
+                topSpeedInt = rawStr.replace("+","").toInt()
+                topSpeedInt += rawStr.count { it == '+' } * 10
             } else if (powerRegex.matches(line)) {
                 // エンジンパワー設定(加速力)
-                powerInt = line.replace("Power: ","").toInt()
+                val rawStr = line.replace("Power: ","")
+                powerInt = rawStr.replace("+","").toInt()
+                powerInt += rawStr.count { it == '+' } * 2
             } else if (brakeRegex.matches(line)) {
                 // ブレーキ力(減速力)
-                brakeInt = line.replace("Brake: ","").toInt()
+                val rawStr = line.replace("Brake: ","")
+                brakeInt = rawStr.replace("+","").toInt()
+                brakeInt += rawStr.count { it == '+' } * 2
             } else if (slipRegex.matches(line)) {
                 // モーメント(スリップ)力
-                slipInt = line.replace("Momentum: ","").toInt()
+                val rawStr = line.replace("Momentum: ","")
+                slipInt = rawStr.replace("+","").replace("-","").toInt()
+                slipInt += rawStr.count { it == '+' } * 2
+                slipInt -= rawStr.count { it == '-' } * 2
+                if (slipInt < 0) {
+                    slipInt = 0
+                }
+            } else if (rentalRegex.matches(line)) {
+                // レンタカー機能
+                rentalInt = line.replace("Rental: ", "").toInt()
             }
+        }
+        val normalBoat = !meta.hasLore()
+        if (normalBoat) {
+            rentalInt = 10
         }
 
         if (topSpeedInt > 500) {
@@ -156,7 +177,7 @@ object RideEvent: Listener {
                     val brake = brakeInt * 0.001
                     val momentum = slipInt * 0.1F
 
-                    val boatData = LandBoat(boat,Vector(),topSpeed,power,brake,bossBar,0F, momentum, mutableMapOf(), boat.location.toVector(), item.clone(), false)
+                    val boatData = LandBoat(boat,Vector(),topSpeed,power,brake,bossBar,0F, momentum, mutableMapOf(), boat.location.toVector(), item.clone(), false, rentalInt, 0, player)
                     RideEvent.boatList.add(boatData)
                 }
             }
@@ -181,7 +202,12 @@ object RideEvent: Listener {
                 if (entity != null) {
                     if (entity !is Item) return
                     if (boatRegex.matches(entity.itemStack.type.name)) {
-                        entity.itemStack = boatData.item
+                        if (boatData.placePlayer.isOnline) {
+                            entity.remove()
+                            boatData.placePlayer.inventory.addItem(boatData.item)
+                        } else {
+                            entity.itemStack = boatData.item
+                        }
                     }
                 }
                 boatList.remove(boatData)

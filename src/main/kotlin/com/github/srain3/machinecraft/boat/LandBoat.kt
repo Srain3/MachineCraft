@@ -25,7 +25,10 @@ data class LandBoat(
     val distanceIsBoat: MutableMap<Player, Double>,
     var distanceVector: Vector,
     val item: ItemStack,
-    var flySwitch: Boolean
+    var flySwitch: Boolean,
+    val rental: Int?,
+    var fee: Int,
+    val placePlayer: Player
 ) {
     /**
      * 操縦者を取得
@@ -63,7 +66,12 @@ data class LandBoat(
                 speedString = "&c&l${speedString}&r&ckm/h"
             }
             bossBar.progress = barPercent.absoluteValue
-            bossBar.setTitle(ToolBox.colorMessage("Boat Speed: $speedString"))
+
+            if (rental != null) {
+                bossBar.setTitle(ToolBox.colorMessage("Boat Speed: $speedString &r| Fee: &6${ToolBox.econ?.format(fee.toDouble())}"))
+            } else {
+                bossBar.setTitle(ToolBox.colorMessage("Boat Speed: $speedString"))
+            }
         }
     }
 
@@ -81,7 +89,12 @@ data class LandBoat(
         }
         if (players.isEmpty()) {
             bossBar.players.forEach {
-                it.sendMessage("今回の乗車距離: ${distanceIsBoat[it]?.roundToInt()}m")
+                val distance = distanceIsBoat[it]?.roundToInt() ?: 0
+                it.sendMessage("今回の乗車距離: ${distance}m")
+                if (rental != null) {
+                    ToolBox.econ?.withdrawPlayer(it,fee.toDouble())
+                    it.sendMessage("レンタル料金: ${ToolBox.econ?.format(fee.toDouble())}")
+                }
                 distanceIsBoat.remove(it)
                 distanceVector = boat.location.toVector()
             }
@@ -92,11 +105,18 @@ data class LandBoat(
             if (it.isOnline) {
                 if (!players.contains(it)) {
                     it.sendMessage("今回の乗車距離: ${distanceIsBoat[it]?.roundToInt()}m")
+                    if (rental != null) {
+                        ToolBox.econ?.withdrawPlayer(it,fee.toDouble())
+                        it.sendMessage("レンタル料金: ${ToolBox.econ?.format(fee.toDouble())}")
+                    }
                     distanceIsBoat.remove(it)
                     distanceVector = boat.location.toVector()
                     bossBar.removePlayer(it)
                 }
             } else {
+                if (rental != null) {
+                    ToolBox.econ?.withdrawPlayer(it,fee.toDouble())
+                }
                 distanceIsBoat.remove(it)
                 distanceVector = boat.location.toVector()
                 bossBar.removePlayer(it)
@@ -334,8 +354,16 @@ data class LandBoat(
      */
     fun distanceUpdate() {
         val player = getControlPlayer() ?: return
-        val distance = distanceVector.distance(boat.location.toVector())
+        var distance = distanceVector.distance(boat.location.toVector())
+
+        if (rental != null) {
+            if (onIce()) {
+                distance = 0.0
+            }
+        }
         distanceIsBoat[player] = (distanceIsBoat[player] ?: 0.0) + distance
         distanceVector = boat.location.toVector()
+
+        fee = (ToolBox.distanceFee * (distanceIsBoat[player] ?: 0.0).roundToInt() + (rental ?: 0)).roundToInt()
     }
 }

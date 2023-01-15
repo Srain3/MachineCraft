@@ -1,8 +1,15 @@
 package com.github.srain3.machinecraft.tools
 
 import com.github.srain3.machinecraft.MachineCraft
+import net.milkbowl.vault.economy.Economy
+import org.bukkit.Bukkit.getServer
 import org.bukkit.ChatColor
 import org.bukkit.NamespacedKey
+import org.bukkit.plugin.RegisteredServiceProvider
+import org.geysermc.api.Geyser
+import org.geysermc.api.GeyserApiBase
+import org.geysermc.floodgate.api.FloodgateApi
+
 
 /**
  * 細々した呼び出し頻度のある便利ボックス
@@ -25,4 +32,30 @@ object ToolBox {
     fun pluginNamespaceKey(string: String): NamespacedKey {
         return NamespacedKey(pl, "MachineCraft-$string")
     }
+
+    /**
+     * Vault(お金)扱うやつ
+     */
+    var econ: Economy? = null
+
+    fun setupEconomy(): Boolean {
+        if (getServer().pluginManager.getPlugin("Vault") == null) {
+            return false
+        }
+        val rsp: RegisteredServiceProvider<Economy> =
+            getServer().servicesManager.getRegistration(Economy::class.java)
+                ?: return false
+        econ = rsp.provider
+        return true
+    }
+
+    /**
+     * レンタル走行距離料金(1mごと)
+     */
+    var distanceFee = 0.1
+
+    fun getConfigToRentalFee() {
+        distanceFee = pl.config.getDouble("Rental_distance_fee", 0.1)
+    }
+
 }
