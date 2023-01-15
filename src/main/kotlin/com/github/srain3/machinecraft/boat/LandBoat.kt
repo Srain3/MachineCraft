@@ -24,7 +24,8 @@ data class LandBoat(
     val slipMomentum: Float,
     val distanceIsBoat: MutableMap<Player, Double>,
     var distanceVector: Vector,
-    val item: ItemStack
+    val item: ItemStack,
+    var flySwitch: Boolean
 ) {
     /**
      * 操縦者を取得
@@ -138,25 +139,52 @@ data class LandBoat(
         pVec.rotateAroundY(-PI /180*(-player.eyeLocation.yaw))
         pVec.multiply(200)
         val wasd = wasdKey(pVec)
+        val jumpSwitch = player.isFlying
+        //player.sendMessage("$jumpSwitch")
         //Bukkit.getLogger().info(wasd)
 
-        val addSpeed = Vector(0.0,0.0,1.0)
-        speed.multiply(0.965) // 摩擦的なやつ
-        when (wasd) { // 速度の判定
-            "W", "WA", "WD" -> {
-                addSpeed.multiply(power * min(1.0, max(0.35, (speed.z * (0.038-(speed.z*0.0034)) / (power*(0.8-power))))))
-            }
-            "S", "SA", "SD" -> {
-                addSpeed.multiply(-brakePower * min(1.0, max(0.35, (speed.z.absoluteValue * (0.038-(speed.z.absoluteValue*0.0034)) / (brakePower*(0.8-brakePower))))))
-            }
-            else -> {
-                if (speed.z in -0.03..0.03) {
-                    speed.multiply(0)
-                }
-                addSpeed.multiply(0)
-            }
+        if (flySwitch != jumpSwitch) {
+            player.sendMessage(ToolBox.colorMessage("[BoatCar] &aクルーズコントロールを&6${jumpSwitch}&aにしました。"))
+            flySwitch = jumpSwitch
         }
-        speed.add(addSpeed)
+
+        val addSpeed = Vector(0.0,0.0,1.0)
+
+        if (!jumpSwitch) {
+            when (wasd) { // 速度の判定
+                "W", "WA", "WD" -> {
+                    speed.multiply(0.965) // 摩擦的なやつ
+                    addSpeed.multiply(
+                        power * min(
+                            1.0,
+                            max(0.35, (speed.z * (0.038 - (speed.z * 0.0034)) / (power * (0.8 - power))))
+                        )
+                    )
+                }
+
+                "S", "SA", "SD" -> {
+                    speed.multiply(0.965) // 摩擦的なやつ
+                    addSpeed.multiply(
+                        -brakePower * min(
+                            1.0,
+                            max(
+                                0.35,
+                                (speed.z.absoluteValue * (0.038 - (speed.z.absoluteValue * 0.0034)) / (brakePower * (0.8 - brakePower)))
+                            )
+                        )
+                    )
+                }
+
+                else -> {
+                    if (speed.z in -0.03..0.03) {
+                        speed.multiply(0)
+                    }
+                    speed.multiply(0.9975) // 摩擦的なやつ
+                    addSpeed.multiply(0)
+                }
+            }
+            speed.add(addSpeed)
+        }
 
         if (speed.z >= speedLimit) {
             speed.z = speedLimit
@@ -171,22 +199,40 @@ data class LandBoat(
             "A", "WA", "SA" -> {
                 slipAngle = (slipAngle + slipMomentum + min(1.5F,speed.z.absoluteValue.toFloat()*1.2F)) * 0.899F
                 if (wasd != "A") {
-                    speed.multiply(0.9825)
+                    if (wasd == "SA") {
+                        slipAngle *= 0.97F
+                    }
+                    if (!jumpSwitch) {
+                        speed.multiply(0.9925)
+                    }
                 } else {
-                    speed.multiply(0.975)
+                    if (!jumpSwitch) {
+                        speed.multiply(0.995)
+                    }
                 }
             }
             "D", "WD", "SD" -> {
                 slipAngle = (slipAngle - slipMomentum - min(1.5F,speed.z.absoluteValue.toFloat()*1.2F)) * 0.899F
                 if (wasd != "D") {
-                    speed.multiply(0.9825)
+                    if (wasd == "SD") {
+                        slipAngle *= 0.97F
+                    }
+                    if (!jumpSwitch) {
+                        speed.multiply(0.9925)
+                    }
                 } else {
-                    speed.multiply(0.975)
+                    if (!jumpSwitch) {
+                        speed.multiply(0.995)
+                    }
                 }
             }
 
-            "W", "S" -> {
+            "W" -> {
                 slipAngle *= min(0.975F,(slipMomentum/100.0F+0.9F))
+            }
+
+            "S" -> {
+                slipAngle *= min(0.925F,(slipMomentum/100.0F+0.85F))
             }
 
             else -> {

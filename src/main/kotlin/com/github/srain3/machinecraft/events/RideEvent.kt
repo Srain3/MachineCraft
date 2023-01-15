@@ -8,14 +8,17 @@ import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
 import org.bukkit.entity.Boat
 import org.bukkit.entity.Item
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.vehicle.VehicleDestroyEvent
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Vector
 import org.spigotmc.event.entity.EntityMountEvent
+import java.util.UUID
 
 /**
  * 乗車イベント
@@ -23,6 +26,7 @@ import org.spigotmc.event.entity.EntityMountEvent
 object RideEvent: Listener {
 
     val boatList = mutableListOf<LandBoat>()
+    private val uuidList = mutableListOf<UUID>()
 
     /**
      * ボートに乗るイベントキャッチ
@@ -36,12 +40,19 @@ object RideEvent: Listener {
         if (boatList.isEmpty()) return
         if (mount.location.block.type == Material.WATER) return // 水の場合はキャンセル
         //Bukkit.getLogger().info("Mount is NewBoat!")
+        if (event.entity is Player) {
+            (event.entity as Player).isFlying = false
+        }
 
         val boatData = boatList.first()
+        if (uuidList.contains(boatData.boat.uniqueId)) return
+        uuidList.add(boatData.boat.uniqueId)
 
+        // task
         object : BukkitRunnable() {
             override fun run() {
                 if (boatData.boat.isDead) {
+                    uuidList.remove(boatData.boat.uniqueId)
                     cancel()
                     return
                 }
@@ -87,6 +98,7 @@ object RideEvent: Listener {
     @Suppress("DEPRECATION")
     @EventHandler
     fun boatEntitySpawn(event: PlayerInteractEvent) {
+        if (event.hand != EquipmentSlot.HAND) return
         if (event.action != Action.RIGHT_CLICK_BLOCK) return
         if (event.isCancelled) return
         val item = event.item?.clone() ?: return
@@ -94,6 +106,8 @@ object RideEvent: Listener {
         val meta = item.itemMeta ?: return
         val clickLoc = event.clickedBlock?.location?.clone() ?: return
         clickLoc.y += 1.0
+
+        if (clickLoc.block.type == Material.WATER) return
 
         var topSpeedInt = 50
         var powerInt = 40
@@ -142,7 +156,7 @@ object RideEvent: Listener {
                     val brake = brakeInt * 0.001
                     val momentum = slipInt * 0.1F
 
-                    val boatData = LandBoat(boat,Vector(),topSpeed,power,brake,bossBar,0F, momentum, mutableMapOf(), boat.location.toVector(), item.clone())
+                    val boatData = LandBoat(boat,Vector(),topSpeed,power,brake,bossBar,0F, momentum, mutableMapOf(), boat.location.toVector(), item.clone(), false)
                     RideEvent.boatList.add(boatData)
                 }
             }
