@@ -4,13 +4,13 @@ plugins {
 }
 
 group = 'com.github.srain3'
-version = '0.3.0'
+version = '0.3.1'
 
 repositories {
     mavenCentral()
     maven { url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
     maven { url 'https://jitpack.io' }
-    maven { url = "https://repo.opencollab.dev/main/" }
+    //maven { url = "https://repo.opencollab.dev/main/" }
 }
 
 dependencies {
@@ -18,8 +18,8 @@ dependencies {
     compileOnly "org.spigotmc:spigot-api:1.19.2-R0.1-SNAPSHOT"
     compileOnly "com.github.MilkBowl:VaultAPI:1.7"
     //compileOnly "org.geysermc.geyser:api:2.1.0-SNAPSHOT"
-    compileOnly(fileTree(dir: 'libs', include: ['api-2.1.0-20230107.195237-75.jar']))
-    compileOnly "org.geysermc.floodgate:api:2.0-SNAPSHOT"
+    //compileOnly(fileTree(dir: 'libs', include: ['api-2.1.0-20230107.195237-75.jar']))
+    //compileOnly "org.geysermc.floodgate:api:2.0-SNAPSHOT"
 }
 
 compileKotlin {

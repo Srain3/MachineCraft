@@ -2,12 +2,14 @@ package com.github.srain3.machinecraft.command
 
 import com.github.srain3.machinecraft.events.RideEvent
 import org.bukkit.Material
+import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
+import org.bukkit.inventory.ItemFlag
 
 object TuningEvent: Listener {
     @EventHandler(priority = EventPriority.HIGH)
@@ -84,7 +86,9 @@ object TuningEvent: Listener {
         }
 
         boatMeta.lore = newLore
+        boatMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS)
         offHand.itemMeta = boatMeta
+        offHand.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 0)
 
         paper.amount = paper.amount-1
     }

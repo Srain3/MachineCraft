@@ -6,9 +6,6 @@ import org.bukkit.Bukkit.getServer
 import org.bukkit.ChatColor
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.RegisteredServiceProvider
-import org.geysermc.api.Geyser
-import org.geysermc.api.GeyserApiBase
-import org.geysermc.floodgate.api.FloodgateApi
 
 
 /**
