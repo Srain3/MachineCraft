@@ -4,6 +4,7 @@ import org.bukkit.entity.Boat
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent
+import kotlin.math.PI
 
 object VehicleMove: Listener {
 
@@ -18,7 +19,18 @@ object VehicleMove: Listener {
         val eventBoat = event.vehicle as Boat
         val boatData = RideEvent.boatList.firstOrNull { it.boat.uniqueId == eventBoat.uniqueId } ?: return
 
-        boatData.speed.multiply(0.5)
+        if (boatData.speed.z !in -0.05..0.05) {
+            val hitVec = boatData.speed.clone().multiply(1.75).rotateAroundY(-PI / 180 * boatData.boat.location.yaw)
+            if (event.entity is Boat) {
+                hitVec.y = 0.0
+                boatData.speed.multiply(0.975)
+            } else {
+                hitVec.y = 0.5
+                boatData.speed.multiply(0.75)
+            }
+
+            event.entity.velocity = event.entity.velocity.add(hitVec)
+        }
         /* エンティティヒット通知イベント
         val entity = event.entity
         if (entity !is LivingEntity) return
