@@ -2,6 +2,7 @@ package com.github.srain3.machinecraft
 
 import com.github.srain3.machinecraft.command.MachineCraftCmd
 import com.github.srain3.machinecraft.command.MachineCraftCmdTab
+import com.github.srain3.machinecraft.command.TimeAttackCmd
 import com.github.srain3.machinecraft.command.TuningEvent
 import com.github.srain3.machinecraft.events.RideEvent
 import com.github.srain3.machinecraft.events.VehicleMove
@@ -32,6 +33,7 @@ class MachineCraft: JavaPlugin() {
 
         server.getPluginCommand("machinecraft")?.setExecutor(MachineCraftCmd)
         server.getPluginCommand("machinecraft")?.tabCompleter = MachineCraftCmdTab
+        server.getPluginCommand("timeattack")?.setExecutor(TimeAttackCmd)
     }
 
     override fun onDisable() {

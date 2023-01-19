@@ -2,7 +2,7 @@ name: MachineCraft
 author: Srain3
 main: com.github.srain3.machinecraft.MachineCraft
 api-version: 1.19
-version: "0.3.2"
+version: "0.4.0"
 
 depend:
   - Vault
@@ -13,3 +13,6 @@ commands:
   machinecraft:
     aliases: [ mac ]
     description: "MachineCraft command"
+  timeattack:
+    aliases: [ ta ]
+    description: "TimeAttack command"

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.github.srain3'
-version = '0.3.2'
+version = '0.4.0'
 
 repositories {
     mavenCentral()
@@ -18,11 +18,9 @@ dependencies {
     compileOnly "org.spigotmc:spigot-api:1.19.2-R0.1-SNAPSHOT"
     compileOnly "com.github.MilkBowl:VaultAPI:1.7"
     //compileOnly "org.geysermc.geyser:api:2.1.0-SNAPSHOT"
-    //compileOnly(fileTree(dir: 'libs', include: ['api-2.1.0-20230107.195237-75.jar']))
     //compileOnly "org.geysermc.floodgate:api:2.0-SNAPSHOT"
     compileOnly(fileTree(dir: 'libs', include: ['floodgate-spigot.jar']))
     compileOnly(fileTree(dir: 'libs', include: ['Geyser-Spigot.jar']))
-    //compileOnly group: 'io.netty', name: 'netty-all', version: '4.1.43.Final'
 }
 
 compileKotlin {

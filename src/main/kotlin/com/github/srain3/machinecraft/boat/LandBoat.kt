@@ -263,6 +263,14 @@ data class LandBoat(
             }
         }
         //player.sendMessage("Yaw: ${slipAngle[mount]}")
+        when (wasd) {
+            "S", "SA", "SD" -> {
+                Particle.brakeLamp(this,true)
+            }
+            else -> {
+                Particle.brakeLamp(this, false)
+            }
+        }
 
         boat.velocity = speed.clone().rotateAroundY(-PI /180*(boat.location.yaw+slipAngle))
     }
