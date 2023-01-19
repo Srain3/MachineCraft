@@ -2,10 +2,12 @@ name: MachineCraft
 author: Srain3
 main: com.github.srain3.machinecraft.MachineCraft
 api-version: 1.19
-version: "0.3.1"
+version: "0.3.2"
 
 depend:
   - Vault
+  - floodgate
+  - Geyser-Spigot
 
 commands:
   machinecraft:

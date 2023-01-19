@@ -16,6 +16,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.vehicle.VehicleDestroyEvent
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Vector
+import org.geysermc.floodgate.api.FloodgateApi
 import org.spigotmc.event.entity.EntityMountEvent
 import java.util.*
 
@@ -82,6 +83,10 @@ object RideEvent: Listener {
                 boatData.updatePlayer()
 
                 boatData.distanceUpdate()
+
+                if (FloodgateApi.getInstance().isFloodgateId(player.uniqueId)) {
+                    boatData.bedRockConvert(player)
+                }
 
                 return
             }

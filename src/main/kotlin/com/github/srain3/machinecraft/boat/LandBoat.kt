@@ -1,6 +1,7 @@
 package com.github.srain3.machinecraft.boat
 
 import com.github.srain3.machinecraft.tools.ToolBox
+import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundMoveVehiclePacket
 import org.bukkit.Material
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BossBar
@@ -8,6 +9,8 @@ import org.bukkit.entity.Boat
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
+import org.geysermc.geyser.GeyserImpl
+import org.geysermc.geyser.translator.protocol.java.entity.JavaMoveVehicleTranslator
 import kotlin.math.*
 
 /**
@@ -365,5 +368,73 @@ data class LandBoat(
         distanceVector = boat.location.toVector()
 
         fee = (ToolBox.distanceFee * (distanceIsBoat[player] ?: 0.0).roundToInt() + (rental ?: 0)).roundToInt()
+    }
+
+    /**
+     * 統合版対応コード
+     */
+    fun bedRockConvert(player: Player) {
+        val session = GeyserImpl.getInstance().connectionByUuid(player.uniqueId)
+        val pVec = player.velocity.clone()
+        pVec.y = 0.0
+        pVec.rotateAroundY(-PI /180*(-player.eyeLocation.yaw))
+        pVec.multiply(200)
+        val wasd = wasdKey(pVec)
+        if (session != null) {
+            val x = boat.location.x + (boat.velocity.x * 2.5)
+            var y = boat.location.y + bedRockJump() + 0.001045
+            val z = boat.location.z + (boat.velocity.z * 2.5)
+            var yaw = 0F
+            val pitch = boat.location.pitch
+
+            when (wasd) {
+                "A", "WA", "SA" -> {
+                    yaw -= 7.5F
+                }
+                "D", "WD", "SD" -> {
+                    yaw += 7.5F
+                }
+            }
+            val downLoc = boat.location.clone()
+            downLoc.y -= 1.0
+            if (downLoc.block.isPassable) {
+                y += boat.velocity.y
+            }
+            if (!boat.location.block.isPassable) {
+                y += 0.1
+            }
+            //player.sendMessage(wasd)
+            val bedrockBoat = session.entityCache.getEntityByJavaId(boat.entityId)
+            bedrockBoat.updateRotation((boat.location.yaw.div(2.5).roundToInt().times(2.5).toFloat())+yaw,0F,bedrockBoat.isOnGround)
+            JavaMoveVehicleTranslator().translate(session, ClientboundMoveVehiclePacket(x,y,z,bedrockBoat.yaw - 90F,pitch))
+
+            //boat.location.yaw = yaw
+        }
+    }
+
+    /**
+     * 統合版でボートを登らせる
+     */
+    private fun bedRockJump(): Double {
+        val player = getControlPlayer() ?: return 0.0
+        val selectVec = Vector(0.0,0.0,1.0).rotateAroundY(-PI /180*player.eyeLocation.yaw)
+
+        val boatLoc = boat.location
+        val rtb = boat.world.rayTraceBlocks(boatLoc, selectVec, 2.0) ?: return 0.0
+        val hitBlock = rtb.hitBlock ?: return 0.0
+
+        if (!(hitBlock.type == Material.ICE || hitBlock.type == Material.BLUE_ICE || hitBlock.type == Material.FROSTED_ICE || hitBlock.type == Material.PACKED_ICE)) {
+            if (hitBlock.isPassable) return 0.0
+            val upBlock = hitBlock.location.add(0.0,1.0,0.0).block
+            if (!upBlock.isEmpty) {
+                if (!upBlock.isPassable) return 0.0
+            }
+            if (boat.velocity.x in -0.02..0.02 && boat.velocity.z in -0.02..0.02) return 0.0
+            //boat.velocity = boat.velocity.add(Vector(0.0,1.175,0.0))
+            return 1.205
+        } else {
+            //boat.velocity = boat.velocity.setY(0.275)
+            return 0.275
+        }
     }
 }
