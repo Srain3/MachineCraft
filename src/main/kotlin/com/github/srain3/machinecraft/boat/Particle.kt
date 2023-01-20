@@ -7,7 +7,7 @@ import kotlin.math.PI
 
 object Particle {
     fun brakeLamp(boatData: LandBoat, brake: Boolean) {
-        val boat = boatData.getControlPlayer() ?: return
+        val boat = boatData.boat
         val angle = -PI /180*(boat.location.yaw)
         val left = boat.location.clone().add(Vector(0.5,0.25,-1.05 + (boatData.speed.z / 2)).rotateAroundY(angle))
         val right = boat.location.clone().add(Vector(-0.5,0.25,-1.05 + (boatData.speed.z / 2)).rotateAroundY(angle))
