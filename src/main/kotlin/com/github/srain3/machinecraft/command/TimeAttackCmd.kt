@@ -18,12 +18,17 @@ object TimeAttackCmd: CommandExecutor {
         if (command.name != "timeattack") return false
         if (!sender.isOp) return false
         if (args.isNullOrEmpty()) return false
-        if (args.size != 2) return false
+        if (!(args.size == 2 || args.size == 3)) return false
         val circuitName = args[0]
         val sector = args[1].toIntOrNull() ?: return false
+        val near = if (args.size >= 3) {
+            args[2].toIntOrNull() ?: 4
+        } else {
+            4
+        }.toDouble()
         when (sender) {
             is BlockCommandSender -> {
-                sender.block.location.world?.getNearbyEntities(sender.block.location,4.0,4.0,4.0) {
+                sender.block.location.world?.getNearbyEntities(sender.block.location.add(0.5,0.5,0.5),near,near,near) {
                     it is Player
                 }?.forEach { entity ->
                     if (entity !is Player) return@forEach
@@ -36,7 +41,10 @@ object TimeAttackCmd: CommandExecutor {
                         return@forEach
                     } else if (dataList.any { it.circuit == circuitName }) {
                         val data = dataList.firstOrNull { it.circuit == circuitName } ?: return@forEach
-                        val timeLong = LocalTime.now().toNanoOfDay() - data.oldTimeStamp.toNanoOfDay()
+                        var timeLong = LocalTime.now().toNanoOfDay() - data.oldTimeStamp.toNanoOfDay()
+                        if (timeLong < 0) { // 0時を跨ぐとマイナスになってnullエラーを引いてた不具合対応
+                            timeLong += LocalTime.MAX.toNanoOfDay()
+                        }
                         data.lapTime += timeLong
                         if (sector == 0) {
                             val localTime = LocalTime.ofNanoOfDay(data.lapTime)
