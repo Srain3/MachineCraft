@@ -115,6 +115,7 @@ object RideEvent: Listener {
 
         val player = event.player
 
+        var defaultBoat = true
         var topSpeedInt = 50
         var powerInt = 40
         var brakeInt = 20
@@ -126,16 +127,22 @@ object RideEvent: Listener {
                 val rawStr = line.replace("TopSpeed: ","")
                 topSpeedInt = rawStr.replace("+","").toInt()
                 topSpeedInt += rawStr.count { it == '+' } * 10
+
+                defaultBoat = false
             } else if (powerRegex.matches(line)) {
                 // エンジンパワー設定(加速力)
                 val rawStr = line.replace("Power: ","")
                 powerInt = rawStr.replace("+","").toInt()
                 powerInt += rawStr.count { it == '+' } * 2
+
+                defaultBoat = false
             } else if (brakeRegex.matches(line)) {
                 // ブレーキ力(減速力)
                 val rawStr = line.replace("Brake: ","")
                 brakeInt = rawStr.replace("+","").toInt()
                 brakeInt += rawStr.count { it == '+' } * 2
+
+                defaultBoat = false
             } else if (slipRegex.matches(line)) {
                 // モーメント(スリップ)力
                 val rawStr = line.replace("Momentum: ","")
@@ -145,11 +152,17 @@ object RideEvent: Listener {
                 if (slipInt < 0) {
                     slipInt = 0
                 }
+
+                defaultBoat = false
             } else if (rentalRegex.matches(line)) {
                 // レンタカー機能
                 rentalInt = line.replace("Rental: ", "").toInt()
+
+                defaultBoat = false
             }
         }
+        if (defaultBoat) return
+
         val normalBoat = !meta.hasLore()
         if (normalBoat) {
             rentalInt = 10
